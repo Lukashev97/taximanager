@@ -25,7 +25,7 @@ class Driver
     private ?\DateTimeInterface $birth_date = null;
 
     #[ORM\ManyToOne(inversedBy: 'driver', cascade: ['persist', 'remove'])]
-    #[Groups(['driver:read', 'driver:write', 'car:read'])]
+    #[Groups(['driver:read', 'driver:write'])]
     private ?Car $car = null;
 
     public function getId(): ?int
@@ -69,8 +69,4 @@ class Driver
         return $this;
     }
 
-    public function __toString(): string
-    {
-        return (string) 'Id: ' . $this->getId() . ' , Name: ' . $this->getName();
-    }
 }

@@ -21,12 +21,9 @@ class Car
 
     #[ORM\ManyToOne(inversedBy: 'cars')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['car:read', 'car:write', 'model:read'])]
+    #[Groups(['car:read', 'car:write', 'model:read', 'model:write'])]
     private ?Model $model = null;
 
-    #[ORM\ManyToOne(targetEntity: Driver::class, cascade: ['persist', 'remove'])]
-    #[Groups(['car:read', 'driver:read'])]
-    private ?Driver $driver = null;
 
     public function getId(): ?int
     {
@@ -57,30 +54,4 @@ class Car
         return $this;
     }
 
-    public function getDriver(): ?string
-    {
-        return $this->driver ? $this->driver->getName() : null;
-    }
-
-    public function setDriver(?Driver $driver): static
-    {
-        // unset the owning side of the relation if necessary
-        if ($driver === null && $this->driver !== null) {
-            $this->driver->setCar(null);
-        }
-
-        // set the owning side of the relation if necessary
-        if ($driver !== null && $driver->getCar() !== $this) {
-            $driver->setCar($this);
-        }
-
-        $this->driver = $driver;
-
-        return $this;
-    }
-
-    public function __toString(): string
-    {
-        return (string) 'Id: ' . $this->getId() . ' , Car Number: ' . $this->getCarNumber();
-    }
 }

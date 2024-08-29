@@ -16,6 +16,22 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 #[Route('/api/cars')]
 class CarController extends AbstractController
 {
+    #[Route('', name: 'car_index', methods: ['GET'])]
+    public function index(SerializerInterface $serializer, CarRepository $carRepository): JsonResponse
+    {
+        try {
+            $cars = $carRepository->findAll();
+
+            $jsonCars = $serializer->serialize($cars, 'json', ['groups' => ['car:read', 'model:read', 'brand:read']]);
+
+            return new JsonResponse($jsonCars, 200, [], true);
+
+        } catch (\Exception $e) {
+            return new JsonResponse(['status' => $e->getMessage()], 400);
+        }
+    }
+
+
     #[Route('', name: 'car_create', methods: ['POST'])]
     public function create(
         Request $request,

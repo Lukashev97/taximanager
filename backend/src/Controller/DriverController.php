@@ -14,6 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
+
 #[Route('/api/drivers')]
 class DriverController extends AbstractController
 {
@@ -97,33 +98,61 @@ class DriverController extends AbstractController
                 if (!$car) {
                     return new JsonResponse(['error' => 'Car not found'], 404);
                 }
-                $driver->setCar($car);
             }
 
             $serializer->deserialize($data, Driver::class, 'json', [
-                'groups' => ['driver:write' . 'car:write'],
+                'groups' => ['driver:write', 'driver:read'],
                 'object_to_populate' => $driver
             ]);
+
+            if ($car) {
+                $driver->setCar($car);
+            }
 
             $errors = $validator->validate($driver);
             if (count($errors) > 0) {
                 return new JsonResponse((string) $errors, 400);
             }
 
+            $entityManager->persist($driver);
+
             // if we change a car of the particular driver we should write down the logs afterwards 
 
-            if (isset($car)) {
+            if (isset($car) && $car->getId() !== $driver->getId()) {
                 $newLog = new Logger();
                 $formattedText = 'The car has been replaced for a driver\n %s \nCurrent car information: %s';
                 $newLog->setDriver($driver);
                 $newLog->setCar($car);
-                $newLog->setText(sprintf($formattedText, $driver, $car));
+                $newLog->setText(sprintf($formattedText, $driver->getName(), $car->getCarNumber()));
                 $entityManager->persist($newLog);
             }
 
             $entityManager->flush();
 
             return new JsonResponse(['status' => 'Driver has been updated'], 200);
+        } catch (\Exception $e) {
+            return new JsonResponse(['status' => $e->getMessage()], 400);
+        }
+    }
+
+
+    #[Route('/{id}', name: 'driver_show', methods: ['GET'])]
+    public function show(
+        int $id,
+        SerializerInterface $serializer,
+        DriverRepository $driverRepository
+    ): JsonResponse {
+
+        try {
+            $driver = $driverRepository->findOneBy(['id' => $id]);
+
+            if (!isset($driver)) {
+                return new JsonResponse(['error' => 'Driver not found'], 404);
+            }
+
+            $jsonDriver = $serializer->serialize($driver, 'json', ['groups' => ['car:read', 'driver:read', 'model:read', 'brand:read']]);
+
+            return new JsonResponse($jsonDriver, 200, [], true);
         } catch (\Exception $e) {
             return new JsonResponse(['status' => $e->getMessage()], 400);
         }

@@ -1,35 +1,47 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Container from "react-bootstrap/Container";
+import Navbar from "react-bootstrap/Navbar";
+import Nav from "react-bootstrap/Nav";
+import CreateCar from "./pages/CreateCar";
+import CreateDriver from "./pages/CreateDriver";
+import DriverList from "./pages/DriverList";
+import EditDriver from "./pages/EditDriver";
+import Logs from "./pages/Logs";
+import "./App.css";
+
+const queryClient = new QueryClient();
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <QueryClientProvider client={queryClient}>
+        <Router>
+          <Navbar bg="dark" variant="dark" expand="lg">
+            <Container>
+              <Navbar.Brand href="/">Car Management</Navbar.Brand>
+              <Nav className="me-auto">
+                <Nav.Link href="/create-car">CreateCar</Nav.Link>
+                <Nav.Link href="/create-driver">Create Driver</Nav.Link>
+                <Nav.Link href="/drivers">Driver List</Nav.Link>
+                <Nav.Link href="/logs">Logs</Nav.Link>
+              </Nav>
+            </Container>
+          </Navbar>
+          <Container className="mt-4">
+            <Routes>
+              <Route path="/" element={<h1>Welcome to Car Management</h1>} />
+              <Route path="/create-car" element={<CreateCar />} />
+              <Route path="/create-driver" element={<CreateDriver />} />
+              <Route path="/drivers" element={<DriverList />} />
+              <Route path="/edit-driver/:id" element={<EditDriver />} />
+              <Route path="/logs" element={<Logs />} />
+            </Routes>
+          </Container>
+        </Router>
+      </QueryClientProvider>
     </>
-  )
+  );
 }
 
-export default App
+export default App;

@@ -58,7 +58,7 @@ class Logger
 
     public function getDriver(): ?string
     {
-        return $this->driver->__toString();
+        return $this->driver->getName();
     }
 
     public function setDriver(?Driver $driver): static
@@ -70,7 +70,7 @@ class Logger
 
     public function getCar(): ?string
     {
-        return $this->car->__toString();
+        return $this->car->getCarNumber();
     }
 
     public function setCar(?Car $car): static
