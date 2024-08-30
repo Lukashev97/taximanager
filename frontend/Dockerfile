@@ -1,23 +1,33 @@
-FROM node:lts-alpine
+# build image
+FROM node:18-alpine as BUILD_IMAGE
 
-# Set the working directory
-WORKDIR /app
+WORKDIR /app/frontend
 
-# Copy frontend dependencies to container
-COPY package.json ./
+COPY package.json . 
 
-# Install dependencies
-RUN npm install
-RUN npm cache clean --force
+RUN npm install 
 
-# Copy all application files
 COPY . .
 
-RUN rm -rf node_modules
-RUN npm i
+RUN npm run build 
 
-# Expose the port for the frontend
-EXPOSE 3000
+# run image
+FROM node:18-alpine as PRODUCTION_IMAGE
 
-# Start the React app
-CMD ["npm", "run", "dev"]
+WORKDIR /app/frontend
+
+COPY --from=BUILD_IMAGE /app/frontend/dist/ /app/frontend/dist/
+
+EXPOSE 8080
+
+COPY package.json .
+COPY vite.config.js .
+
+RUN npm install vite
+
+EXPOSE 8080
+CMD ["npm", "run", "preview"]
+
+# docker build -t frontend:latest . 
+# docker run -p 8080:8080 frontend:latest
+

@@ -5,10 +5,9 @@ services:
     build:
       context: ./frontend
     ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend:/app
-    command: npm run dev
+      - "8080:8080"
+    # volumes:
+    #   - ./frontend:/app
 
   backend:
     build:
@@ -19,6 +18,8 @@ services:
       - ./backend:/var/www
     depends_on:
       - db
+    environment:
+      DATABASE_URL: postgresql://postgres:admin@db:5432/taximanager?serverVersion=16&charset=utf8
 
   db:
     image: postgres:15
